@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator gen {
+  provider = "prisma-client-js"
+}
+
+generator client {
+  provider = "prisma-class-generator"
+  useSwagger = false
+  dryRun = false
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @default(uuid()) @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String
+  email String @unique
+  roles Role[]
+
+  info Info @relation(fields: [infoId], references: [id], onDelete: Cascade)
+  infoId String
+
+  posts Post[]
+
+  @@map("users")
+}
+
+model Info {
+  id String @default(uuid()) @id
+  user User?
+  hash String
+  currentHashedRefreshToken String?
+
+  @@map("infos")
+}
+
+// TODO: replace this model if needed
+model Post {
+  id String @default(uuid()) @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title String @db.VarChar(500)
+  body String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@map("posts")
+}
+
+enum Role {
+  user
+  admin
+}
